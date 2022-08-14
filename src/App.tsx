@@ -12,72 +12,93 @@ function App() {
   const [bars, setBars] = useState<IBar[]>([
     {
       length: 1 / 4,
-      note: "A#",
+      note: "A#4",
+    },
+    {
+      length: 1 / 4 / 3,
+      note: "F#4",
+    },
+    {
+      length: 1 / 4 / 3,
+      note: "F#4",
+    },
+    {
+      length: 1 / 4 / 3,
+      note: "F#4",
     },
     {
       length: 1 / 4,
-      note: "A#",
+      note: "C#4",
     },
     {
-      length: 1 / 4,
-      note: "A#",
+      length: 1 / 8 + 1/16,
+      note: "C#4",
     },
     {
-      length: 1 / 4,
-      note: "A#",
+      length: 1/16,
+      note: "#4",
     },
-
   ]);
 
   const ref = useRef<HTMLDivElement>(null);
+  const [curr, setCurr] = useState(0);
   const ref2 = useRef<HTMLDivElement>(null);
   const tween = useRef<gsap.core.Tween | null>(null);
   const synth = useRef<Tone.Synth | null>(null);
   const beats = useRef<number>(0);
 
   useEffect(() => {
-    Tone.Transport.bpm.value = 70
+    Tone.Transport.bpm.value = 80;
     synth.current = new Tone.Synth({
       envelope: {
-        release:0.1
-      }
-    }).toDestination()
-  },[])
+        release: 0.1,
+      },
+    }).toDestination();
+  }, []);
+
+  useEffect(() => {});
 
   const start = async () => {
-    await Tone.start()
+    await Tone.start();
 
-    const lengthOfMeasure = Tone.Time("1m").toSeconds() 
-    
-    const part = new Tone.Part(((time, value) => {
-      // the value is an object which contains both the note and the velocity
-      synth.current?.triggerAttackRelease(value, "8n", time);
-    }), [
-      [lengthOfMeasure*1/4*0,"C4"],
-      [lengthOfMeasure*1/4*1,"C4"],
-      [lengthOfMeasure*1/4*2,"C4"],
-      [lengthOfMeasure*1/4*3,"C4"],
+    const lengthOfMeasure = Tone.Time("1m").toSeconds();
 
-    ]);
+    let currentTime = 0;
+    const notes = bars.map((b, i) => {
+      const toReturn = { time: currentTime, note: b.note };
+      currentTime += b.length * lengthOfMeasure;
+      return toReturn;
+    });
+    let t = false
+    const part = new Tone.Part((time, value) => {
+      
 
-    const m = new Tone.Loop(time => {
-      if(beats.current % 4 === 0) {
-        console.log(beats);
-        
+      if(t) {
         Tone.Draw.schedule(() => {
-          tween.current?.restart()
-        },time)
+          setCurr((prev) => (prev + 1) % bars.length);
+        }, time);
       }
-      beats.current++
-    },"4n").start(0)
-    
+
+      t = true
+
+      synth.current?.triggerAttackRelease(value.note, "8n", time);
+    }, notes).start(0);
+
+    const m = new Tone.Loop((time) => {
+      if (beats.current % 4 === 0) {
+        Tone.Draw.schedule(() => {
+          tween.current?.restart();
+        }, time);
+      }
+      beats.current++;
+    }, "4n").start(0);
+
     part.loop = true;
-    
-    part.start(0)
-    
-    
+
+    part.start(0);
+
     Tone.Transport.start();
-    
+
     tween.current = gsap.fromTo(
       ref2.current,
       {
@@ -85,23 +106,21 @@ function App() {
       },
       {
         left: "100%",
-        duration: 60/Tone.Transport.bpm.value*4,
+        duration: (60 / Tone.Transport.bpm.value) * 4,
         ease: "linear",
       }
     );
   };
 
   const onInput = (e: React.FormEvent<HTMLInputElement>) => {
-    console.log(+e.currentTarget.value);
-    
-    tween.current?.timeScale(+e.currentTarget.value / 1000)
-  }
+    tween.current?.timeScale(+e.currentTarget.value / 1000);
+  };
 
   const re = () => {
     beats.current = 0;
     Tone.Transport.seconds = 0;
-    tween.current?.restart()
-  }
+    tween.current?.restart();
+  };
 
   return (
     <div className="h-full grid content-center gap-28">
@@ -118,8 +137,8 @@ function App() {
         "
       >
         <div className="flex flex-1">
-          {bars.map((v,i) => (
-            <Bar key={i} w={v.length} />
+          {bars.map((v, i) => (
+            <Bar key={i} isCurrent={curr === i} w={v.length} />
           ))}
         </div>
         <MeasureMentContainer />
@@ -131,7 +150,6 @@ function App() {
       <button onClick={re}>re</button>
       <input type="range" onInput={onInput} id="" min="0" max="4000" />
     </div>
-
   );
 }
 
