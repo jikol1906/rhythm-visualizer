@@ -1,7 +1,7 @@
 import * as React from "react";
 
 interface IMeasurementProps {
-    removeLast:boolean
+    removeLast?:boolean
 }
 
 interface BoxProps {
