@@ -29,7 +29,7 @@ const Box: React.FunctionComponent<BoxProps> = ({ w }) => {
 
 const Measurement: React.FunctionComponent<IMeasurementProps> = ({removeLast}) => {
   return (
-    <div className="grid grid-cols-[repeat(8,1fr)] justify-items-end w-1/4 left-0 bottom-0 h-full opacity-80">
+    <div className="grid flex-1 grid-cols-[repeat(8,1fr)] justify-items-end w-1/4 left-0 bottom-0 h-full opacity-80">
       <Box w={1} />
       <Box w={1} />
       <Box w={1} />

@@ -3,13 +3,13 @@ import "./App.css";
 import Bar from "./Components/Bar";
 import Measurement from "./Components/Measurement";
 import { gsap } from "gsap";
+import MeasureMentContainer from "./Components/MeasureMentContainer";
 
 function App() {
   const [bars, setBars] = useState([
-    1 / 4, 
-    1 / 8, 
-    1 / 4, 1/8+1/16,
-    1/16]);
+    ...Array(12).fill(1 / 4 / 3)
+     
+  ]);
   
   const ref = useRef<HTMLDivElement>(null)
 
@@ -45,12 +45,7 @@ function App() {
             <Bar w={v} />
           ))}
         </div>
-        <div className="absolute flex left-0 bottom-0 h-5 w-full">
-          <Measurement />
-          <Measurement />
-          <Measurement />
-          <Measurement removeLast={true} />
-        </div>
+            <MeasureMentContainer/>
       </div>
     </div>
   );
