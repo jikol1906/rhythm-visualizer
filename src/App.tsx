@@ -49,33 +49,27 @@ function App() {
         repeat: -1,
       }
     );
-
-
-    setTimeout(() => {
-
-      console.log(g.duration());
-      
-    },1000)
   };
 
   const onInput = (e: React.FormEvent<HTMLInputElement>) => {
+    console.log(+e.currentTarget.value);
+    
     tween.current?.timeScale(+e.currentTarget.value / 1000)
   }
 
   return (
-    <div className="h-full flex justify-center items-center">
+    <div className="h-full grid content-center gap-28">
       <div
         ref={ref}
         className="
         drop-shadow-md		
-    bg-secondary 
-    flex 
-    flex-1
-    rounded-md 
-    max-w-container
-    h-container
-    relative
-    "
+      bg-secondary 
+        flex 
+        flex-1
+        rounded-md 
+        h-container
+        relative
+        "
       >
         <div className="flex flex-1">
           {bars.map((v,i) => (
