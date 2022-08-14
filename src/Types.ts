@@ -16,5 +16,7 @@ export type ScientificNote = `${ScientificNoteWithAccidental | Note}${
 
 export interface IBar {
     note:ScientificNote,
-    length:number
+    length:number,
+    isPause?:boolean
+
 }

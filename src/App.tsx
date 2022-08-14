@@ -14,29 +14,70 @@ function App() {
       length: 1 / 4,
       note: "A#",
     },
+    {
+      length: 1 / 4,
+      note: "A#",
+    },
+    {
+      length: 1 / 4,
+      note: "A#",
+    },
+    {
+      length: 1 / 4,
+      note: "A#",
+    },
+
   ]);
 
   const ref = useRef<HTMLDivElement>(null);
   const ref2 = useRef<HTMLDivElement>(null);
   const tween = useRef<gsap.core.Tween | null>(null);
+  const synth = useRef<Tone.Synth | null>(null);
+  const beats = useRef<number>(0);
 
-  useLayoutEffect(() => {
-    gsap.fromTo(
-      ref.current,
-      {
-        opacity: 0,
-        y: -50,
-      },
-      {
-        opacity: 1,
-        y: -0,
-        duration: 1.3,
-        ease: "circ.out",
+  useEffect(() => {
+    Tone.Transport.bpm.value = 70
+    synth.current = new Tone.Synth({
+      envelope: {
+        release:0.1
       }
-    );
-  }, []);
+    }).toDestination()
+  },[])
 
-  const start = () => {
+  const start = async () => {
+    await Tone.start()
+
+    const lengthOfMeasure = Tone.Time("1m").toSeconds() 
+    
+    const part = new Tone.Part(((time, value) => {
+      // the value is an object which contains both the note and the velocity
+      synth.current?.triggerAttackRelease(value, "8n", time);
+    }), [
+      [lengthOfMeasure*1/4*0,"C4"],
+      [lengthOfMeasure*1/4*1,"C4"],
+      [lengthOfMeasure*1/4*2,"C4"],
+      [lengthOfMeasure*1/4*3,"C4"],
+
+    ]);
+
+    const m = new Tone.Loop(time => {
+      if(beats.current % 4 === 0) {
+        console.log(beats);
+        
+        Tone.Draw.schedule(() => {
+          tween.current?.restart()
+        },time)
+      }
+      beats.current++
+    },"4n").start(0)
+    
+    part.loop = true;
+    
+    part.start(0)
+    
+    
+    Tone.Transport.start();
+    
     tween.current = gsap.fromTo(
       ref2.current,
       {
@@ -44,9 +85,8 @@ function App() {
       },
       {
         left: "100%",
-        duration: 10,
+        duration: 60/Tone.Transport.bpm.value*4,
         ease: "linear",
-        repeat: -1,
       }
     );
   };
@@ -55,6 +95,12 @@ function App() {
     console.log(+e.currentTarget.value);
     
     tween.current?.timeScale(+e.currentTarget.value / 1000)
+  }
+
+  const re = () => {
+    beats.current = 0;
+    Tone.Transport.seconds = 0;
+    tween.current?.restart()
   }
 
   return (
@@ -82,6 +128,7 @@ function App() {
         </div>
       </div>
       <button onClick={start}>Start</button>
+      <button onClick={re}>re</button>
       <input type="range" onInput={onInput} id="" min="0" max="4000" />
     </div>
 
