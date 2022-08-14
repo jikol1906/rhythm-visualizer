@@ -4,14 +4,19 @@ import Bar from "./Components/Bar";
 import Measurement from "./Components/Measurement";
 import { gsap } from "gsap";
 import MeasureMentContainer from "./Components/MeasureMentContainer";
+import Pointer from "./Components/Pointer";
 
 function App() {
   const [bars, setBars] = useState([
-    ...Array(12).fill(1 / 4 / 3)
+    1/4,
+    1/4,
+    1/4,
+    
      
   ]);
   
   const ref = useRef<HTMLDivElement>(null)
+  const ref2 = useRef<HTMLDivElement>(null)
 
   useLayoutEffect(() => {
     gsap.fromTo(ref.current,{
@@ -21,9 +26,23 @@ function App() {
     }, {
       opacity: 1,
       y:-0,
-      duration:2,
+      duration:1.3,
       ease: "circ.out",
     })
+
+    const g = gsap.fromTo(ref2.current,{
+      left:0,
+      
+    }, {
+      left:"100%",
+      duration:10,
+      ease: "linear",
+      repeat:-1
+    })
+
+
+
+
   }, []);
   return (
     <div className="h-full flex justify-center items-center">
@@ -33,11 +52,11 @@ function App() {
         drop-shadow-md		
     bg-secondary 
     flex 
+    flex-1
     rounded-md 
-    w-container 
-    h-container overflow-hidden 
+    max-w-container
+    h-container
     relative
-    
     "
       >
         <div className="flex flex-1">
@@ -46,8 +65,12 @@ function App() {
           ))}
         </div>
             <MeasureMentContainer/>
+            <div ref={ref2} className="absolute left-0 top-[120%] -translate-x-1/2">
+              <Pointer/>
+            </div>
       </div>
     </div>
+    
   );
 }
 

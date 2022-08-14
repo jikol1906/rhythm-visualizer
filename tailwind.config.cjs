@@ -9,8 +9,10 @@ module.exports = {
         tertiary: "#6EE5FF"
       },
       width: {
-        container:"60rem",
         containerSmall:"40rem"
+      },
+      maxWidth: {
+        container:"60rem",
       },
       height: {
         container:"6rem"
