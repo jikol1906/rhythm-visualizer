@@ -24,7 +24,7 @@ function App() {
   const beats = useRef<number>(0);
 
   useEffect(() => {
-    Tone.Transport.bpm.value = 40;
+    Tone.Transport.bpm.value = 50;
     synth.current = new Tone.Synth({
       envelope: {
         release: 0.1,
@@ -44,6 +44,10 @@ function App() {
 
     if(loop.current) {
       loop.current.dispose()
+    }
+
+    if(tween.current) {
+      tween.current.kill()
     }
   }
 
@@ -141,7 +145,7 @@ function App() {
           updatedBars.push({
             length: n,
             // @ts-ignore
-            note: ["A4","C4","E4","A3","C3","E3","A5","C5","E5"][Math.floor(Math.random()*9)],
+            note: ["A4","C4","E4","A3","C3","E3"][Math.floor(Math.random()*6)],
           });
         });
 
