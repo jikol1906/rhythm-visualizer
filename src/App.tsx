@@ -20,10 +20,11 @@ function App() {
   const part = useRef<Tone.Part | null>(null);
   const metronome = useRef<Tone.Synth | null>(null);
   const loop = useRef<Tone.Loop | null>(null);
+  const toneStarted = useRef(false)
   const beats = useRef<number>(0);
 
   useEffect(() => {
-    Tone.Transport.bpm.value = 80;
+    Tone.Transport.bpm.value = 40;
     synth.current = new Tone.Synth({
       envelope: {
         release: 0.1,
@@ -47,7 +48,12 @@ function App() {
   }
 
   const start = async () => {
-    await Tone.start();
+    if(!toneStarted.current) {
+      await Tone.start();
+      console.log('starting tone');
+      
+      toneStarted.current = true
+    }
     re()
     disposeOldParts();
     const lengthOfMeasure = Tone.Time("1m").toSeconds();
@@ -73,7 +79,7 @@ function App() {
         }, time);
       }
       beats.current++;
-      metronome.current?.triggerAttackRelease("C6", 0.05, time);
+      metronome.current?.triggerAttackRelease("C6", 0.05, time,.5);
     }, "4n").start(0);
 
     part.current.loop = true;
@@ -134,7 +140,8 @@ function App() {
         res.forEach((n) => {
           updatedBars.push({
             length: n,
-            note: "C#4",
+            // @ts-ignore
+            note: ["A4","C4","E4","A3","C3","E3","A5","C5","E5"][Math.floor(Math.random()*9)],
           });
         });
 
@@ -143,7 +150,8 @@ function App() {
         const res = math.evaluate(e.currentTarget.value) as number;
         updatedBars.push({
           length: res,
-          note: "A#4",
+          // @ts-ignore
+          note: ["A#4","C#4","F#4"][Math.floor(Math.random()*3)],
         });
       }
 
