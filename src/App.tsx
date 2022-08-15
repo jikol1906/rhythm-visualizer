@@ -10,39 +10,16 @@ import { IBar } from "./Types";
 import * as math from "mathjs";
 
 function App() {
-  const [bars, setBars] = useState<IBar[]>([
-    {
-      length: 1 / 4 + 1 / 8 + 1 / 32,
-      note: "A#4",
-    },
-    {
-      length: 1 / 32,
-      note: "F#4",
-    },
-    {
-      length: 1 / 32,
-      note: "C#4",
-    },
-    {
-      length: 1 / 32,
-      note: "G#4",
-    },
-    {
-      length: 1 / 4 + 1 / 8,
-      note: "F#4",
-    },
-    {
-      length: 1 / 8,
-      note: "D#4",
-    },
-  ]);
+  const [bars, setBars] = useState<IBar[]>([]);
 
   const ref = useRef<HTMLDivElement>(null);
   const [curr, setCurr] = useState(-1);
   const ref2 = useRef<HTMLDivElement>(null);
   const tween = useRef<gsap.core.Tween | null>(null);
   const synth = useRef<Tone.Synth | null>(null);
+  const part = useRef<Tone.Part | null>(null);
   const metronome = useRef<Tone.Synth | null>(null);
+  const loop = useRef<Tone.Loop | null>(null);
   const beats = useRef<number>(0);
 
   useEffect(() => {
@@ -59,9 +36,20 @@ function App() {
     }).toDestination();
   }, []);
 
+  const disposeOldParts = () => {
+    if(part.current) {
+      part.current.dispose();
+    }
+
+    if(loop.current) {
+      loop.current.dispose()
+    }
+  }
+
   const start = async () => {
     await Tone.start();
-
+    re()
+    disposeOldParts();
     const lengthOfMeasure = Tone.Time("1m").toSeconds();
 
     let currentTime = 0;
@@ -71,14 +59,14 @@ function App() {
       return toReturn;
     });
 
-    const part = new Tone.Part((time, value) => {
+    part.current = new Tone.Part((time, value) => {
       Tone.Draw.schedule(() => {
         setCurr((prev) => (prev + 1) % bars.length);
       }, time);
 
       synth.current?.triggerAttackRelease(value.note, 2, time);
     }, notes).start(0);
-    const m = new Tone.Loop((time) => {
+    loop.current = new Tone.Loop((time) => {
       if (beats.current % 4 === 0) {
         Tone.Draw.schedule(() => {
           tween.current?.restart();
@@ -88,9 +76,9 @@ function App() {
       metronome.current?.triggerAttackRelease("C6", 0.05, time);
     }, "4n").start(0);
 
-    part.loop = true;
+    part.current.loop = true;
 
-    part.start(0);
+    part.current.start(0);
 
     Tone.Transport.start();
 
