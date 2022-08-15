@@ -11,37 +11,35 @@ import { IBar } from "./Types";
 function App() {
   const [bars, setBars] = useState<IBar[]>([
     {
-      length: 1 / 4,
+      length: 1/4+1/8+1/32,
       note: "A#4",
     },
     {
-      length: 1 / 4 / 3,
-      note: "F#4",
+      length: 1 / 32,
+      note: "A#4",
     },
     {
-      length: 1 / 4 / 3,
-      note: "F#4",
+      length: 1 / 32,
+      note: "A#4",
     },
     {
-      length: 1 / 4 / 3,
-      note: "F#4",
+      length: 1 / 32,
+      note: "A#4",
     },
     {
-      length: 1 / 4,
-      note: "C#4",
+      length: 1/4+1/8,
+      note: "A#4",
     },
     {
-      length: 1 / 8 + 1/16,
-      note: "C#4",
+      length: 1/8,
+      note: "A#4",
     },
-    {
-      length: 1/16,
-      note: "#4",
-    },
+
+  
   ]);
 
   const ref = useRef<HTMLDivElement>(null);
-  const [curr, setCurr] = useState(0);
+  const [curr, setCurr] = useState(-1);
   const ref2 = useRef<HTMLDivElement>(null);
   const tween = useRef<gsap.core.Tween | null>(null);
   const synth = useRef<Tone.Synth | null>(null);
@@ -69,17 +67,18 @@ function App() {
       currentTime += b.length * lengthOfMeasure;
       return toReturn;
     });
-    let t = false
+    
     const part = new Tone.Part((time, value) => {
+    
       
-
-      if(t) {
+      
+      
         Tone.Draw.schedule(() => {
           setCurr((prev) => (prev + 1) % bars.length);
         }, time);
-      }
+      
 
-      t = true
+      
 
       synth.current?.triggerAttackRelease(value.note, "8n", time);
     }, notes).start(0);
@@ -120,10 +119,21 @@ function App() {
     beats.current = 0;
     Tone.Transport.seconds = 0;
     tween.current?.restart();
+    setCurr(-1)
   };
 
+  const pause = () => {
+    Tone.Transport.pause();
+    tween.current?.pause();
+  }
+  const resume = () => {
+    
+    Tone.Transport.start();
+    tween.current?.play();
+  }
+
   return (
-    <div className="h-full grid content-center gap-28">
+    <div className="h-full grid content-center gap-[4rem]">
       <div
         ref={ref}
         className="
@@ -148,6 +158,8 @@ function App() {
       </div>
       <button onClick={start}>Start</button>
       <button onClick={re}>re</button>
+      <button onClick={pause}>pause</button>
+      <button onClick={resume}>resume</button>
       <input type="range" onInput={onInput} id="" min="0" max="4000" />
     </div>
   );
