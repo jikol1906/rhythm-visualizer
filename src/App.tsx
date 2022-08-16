@@ -12,7 +12,7 @@ import * as math from "mathjs";
 function App() {
   const [bars, setBars] = useState<IBar[]>([]);
 
-  const ref = useRef<HTMLDivElement>(null);
+  
   const [curr, setCurr] = useState(-1);
   const ref2 = useRef<HTMLDivElement>(null);
   const tween = useRef<gsap.core.Tween | null>(null);
@@ -206,7 +206,7 @@ function App() {
   return (
     <div className="h-full grid content-center">
       <div
-        ref={ref}
+        
         className="
         drop-shadow-md		
       bg-secondary 
