@@ -9,11 +9,14 @@ import * as Tone from "tone";
 import { IBar } from "./Types";
 import * as math from "mathjs";
 
+const startBPM = 120
+
 function App() {
   const [bars, setBars] = useState<IBar[]>([]);
 
   
   const [curr, setCurr] = useState(-1);
+  const [bpm, setBpm] = useState(startBPM)
   const ref2 = useRef<HTMLDivElement>(null);
   const tween = useRef<gsap.core.Tween | null>(null);
   const synth = useRef<Tone.Synth | null>(null);
@@ -35,6 +38,14 @@ function App() {
       },
     }).toDestination();
   }, []);
+
+  useEffect(() => {
+    Tone.Transport.bpm.value = bpm;
+
+    if(tween.current) {
+      tween.current.timeScale(bpm/startBPM)
+    }
+  },[bpm])
 
 
   useEffect(() => {
@@ -90,11 +101,6 @@ function App() {
 
   },[bars])
 
-
-  const toggleTransport = () => {
-    Tone.Transport.toggle();
-  }
-
   const start = async () => {
     if(!toneStarted.current) {
       await Tone.start();  
@@ -122,9 +128,9 @@ function App() {
 
   };
 
-  const onInput = (e: React.FormEvent<HTMLInputElement>) => {
-    tween.current?.timeScale(+e.currentTarget.value / 1000);
-  };
+  const updateNotePart = () => {
+
+  }
 
   const re = () => {
     beats.current = 0;
@@ -145,7 +151,7 @@ function App() {
   const onNoteInput = (e: React.FormEvent<HTMLInputElement>) => {
     const space = "\\s*"
     const comma = `${space},${space}`;
-    const note = `[A-G][#b]?[0-9]`
+    const note = `[A-Ga-g][#b]?[0-9]`
     const pause =`p`
     const plus = `${space}\\+${space}`;
     const fraction = `\\d+(?:\\/\\d+)+`;
@@ -194,12 +200,10 @@ function App() {
   };
   
   const increaseBPM = () => {
-    Tone.Transport.bpm.value = Tone.Transport.bpm.value * 1.20
-    tween.current?.timeScale( tween.current?.timeScale() * 1.20)
+    setBpm(prev => prev + 5)
   }
   const decreaseBPM = () => {
-    Tone.Transport.bpm.value = Tone.Transport.bpm.value / 1.20
-    tween.current?.timeScale(tween.current?.timeScale() / 1.20)
+    setBpm(prev => prev - 5)
   }
 
   return (
