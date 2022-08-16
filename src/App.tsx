@@ -68,8 +68,8 @@ function App() {
     });
 
     const part = new Tone.Part((time, value) => {
-      setCurr((prev) => (prev + 1) % bars.length);
       Tone.Draw.schedule(() => {
+        setCurr((prev) => (prev + 1) % bars.length);
       }, time);
       if(!value.isPause) {
         synth.current?.triggerAttackRelease(value.note, value.length, time);
@@ -81,7 +81,11 @@ function App() {
     const m = new Tone.Loop((time) => {
       if (beats.current % 4 === 0) {
         Tone.Draw.schedule(() => {
-          tween.current?.restart();
+          console.log("is active",tween.current?.isActive());
+          
+          if(!tween.current?.paused()) {
+            tween.current?.restart();
+          }
         }, time);
       }
       beats.current++;
@@ -165,27 +169,19 @@ function App() {
         const values = e.currentTarget.value.split(/\s*,\s*/)
         
         
-        // @ts-ignore
+        
         updatedBars = values.map((v,i) => {
           
           let isPause = /p$/.test(v)
           const [_,frac,parsedNote] = v.match(new RegExp(r2)) as string[]
           const t = v.match(new RegExp(r2)) as string[]
 
-    
-          
-          console.log({
-            note:parsedNote,
-            length: math.evaluate(frac),
-            isPause 
-          });
-          
           
           return {
             note:parsedNote,
             length: math.evaluate(frac),
             isPause 
-          }
+          } as IBar
         })
 
       
