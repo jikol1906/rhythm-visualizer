@@ -172,6 +172,15 @@ function App() {
       setBars(updatedBars)
     }
   };
+  
+  const increaseBPM = () => {
+    Tone.Transport.bpm.value = Tone.Transport.bpm.value * 1.20
+    tween.current?.timeScale( tween.current?.timeScale() * 1.20)
+  }
+  const decreaseBPM = () => {
+    Tone.Transport.bpm.value = Tone.Transport.bpm.value / 1.20
+    tween.current?.timeScale(tween.current?.timeScale() / 1.20)
+  }
 
   return (
     <div className="h-full grid content-center">
@@ -203,6 +212,8 @@ function App() {
         <button onClick={re}>Restart</button>
         <button onClick={pause}>Pause</button>
         <button onClick={resume}>Resume</button>
+        <button onClick={increaseBPM}>increase bpm</button>
+        <button onClick={decreaseBPM}>decrease bpm</button>
       </div>
       {/* <input type="range" onInput={onInput} id="" min="0" max="4000" /> */}
       <input
