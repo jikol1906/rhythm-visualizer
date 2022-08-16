@@ -152,7 +152,8 @@ function App() {
     const Aminor = ["A4","C4","E4","A3"].reverse()
     if (new RegExp(r3).test(e.currentTarget.value)) {
       console.log(e.currentTarget.value);
-      if (e.currentTarget.value.includes(",")) {
+      
+      
         const res = math.evaluate(
           e.currentTarget.value.split(/\s*,\s*/)
         ) as number[];
@@ -166,14 +167,7 @@ function App() {
         });
 
         console.log(res);
-      } else {
-        const res = math.evaluate(e.currentTarget.value) as number;
-        updatedBars.push({
-          length: res,
-          // @ts-ignore
-          note: ["A#4","C#4","F#4"][Math.floor(Math.random()*3)],
-        });
-      }
+      
 
       setBars(updatedBars)
     }
