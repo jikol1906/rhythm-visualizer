@@ -58,8 +58,8 @@ function App() {
     });
 
     const part = new Tone.Part((time, value) => {
+      setCurr((prev) => (prev + 1) % bars.length);
       Tone.Draw.schedule(() => {
-        setCurr((prev) => (prev + 1) % bars.length);
       }, time);
       if(!value.isPause) {
         synth.current?.triggerAttackRelease(value.note, value.length, time);
@@ -144,10 +144,13 @@ function App() {
   };
 
   const onNoteInput = (e: React.FormEvent<HTMLInputElement>) => {
-    const comma = "\\s*,\\s*";
-    const plus = "\\s*\\+\\s*";
-    const fraction = "\\d+(?:\\/\\d+)+";
-    const r2 = `${fraction}(?:${plus}${fraction})*p?`;
+    const space = "\\s*"
+    const comma = `${space},${space}`;
+    const note = `[A-G][#b]?[0-9]`
+    const pause =`p`
+    const plus = `${space}\\+${space}`;
+    const fraction = `\\d+(?:\\/\\d+)+`;
+    const r2 = `${space}(${fraction}(?:${plus}${fraction})*)${space}(${pause}|${note})${space}`;
     const r3 = `^${r2}(?:${comma}${r2})*$`;
 
     let updatedBars: IBar[] = [];
@@ -156,19 +159,31 @@ function App() {
       
       
         const values = e.currentTarget.value.split(/\s*,\s*/)
-        console.log(values);
+        
         
         // @ts-ignore
         updatedBars = values.map((v,i) => {
           
           let isPause = /p$/.test(v)
+          const [_,frac,parsedNote] = v.match(new RegExp(r2)) as string[]
+          const t = v.match(new RegExp(r2)) as string[]
 
+          console.log({t,frac,parsedNote});
+          
           v = v.replace(/p/,"")
 
+    
+          
+          console.log({
+            note:parsedNote,
+            length: math.evaluate(frac),
+            isPause 
+          });
+          
           
           return {
-            note:Aminor[i%Aminor.length],
-            length: math.evaluate(v),
+            note:parsedNote,
+            length: math.evaluate(frac),
             isPause 
           }
         })
@@ -205,7 +220,7 @@ function App() {
       >
         <div className="flex flex-1">
           {bars.map((v, i) => (
-            <Bar key={i} isCurrent={curr === i} w={v.length} />
+            <Bar key={i} isPause={v.isPause} isCurrent={curr === i} w={v.length} />
           ))}
         </div>
         <MeasureMentContainer />
