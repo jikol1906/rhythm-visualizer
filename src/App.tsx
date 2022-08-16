@@ -42,30 +42,28 @@ function App() {
 
     const lengthOfMeasure = Tone.Time("1m").toSeconds();
 
-    setCurr(-1)
-    tween.current?.seek(0);
-    beats.current = 0;
+    
     
     
     let currentTime = 0;
     const notes = bars.map((b, i) => {
       
-      console.log(b.length);
       
-      const toReturn = { time: currentTime, note: b.note, length:b.length * lengthOfMeasure };
+      const toReturn = { time: currentTime, note: b.note, length:b.length * lengthOfMeasure, isPause:b.isPause };
       currentTime += b.length * lengthOfMeasure;
-      if(!b.isPause) {
+      
 
         return toReturn;
-      }
+      
     });
 
     const part = new Tone.Part((time, value) => {
       Tone.Draw.schedule(() => {
         setCurr((prev) => (prev + 1) % bars.length);
       }, time);
-
-      synth.current?.triggerAttackRelease(value.note, value.length, time);
+      if(!value.isPause) {
+        synth.current?.triggerAttackRelease(value.note, value.length, time);
+      }
     }, notes).start(0);
     
     part.loop = true;
@@ -80,6 +78,10 @@ function App() {
       metronome.current?.triggerAttackRelease("C6", 0.05, time,.5);
     }, "4n").start(0);
 
+    setCurr(-1)
+    tween.current?.seek(0);
+    beats.current = 0;
+    
     Tone.Transport.seconds = 0;
 
     return () => {
@@ -99,7 +101,7 @@ function App() {
       await Tone.start();  
       toneStarted.current = true
     }
-    // re()
+    re()
     
 
 
@@ -144,29 +146,33 @@ function App() {
   const onNoteInput = (e: React.FormEvent<HTMLInputElement>) => {
     const comma = "\\s*,\\s*";
     const plus = "\\s*\\+\\s*";
-    const r = "\\d+(?:\\/\\d+)+";
-    const r2 = `${r}(?:${plus}${r})*`;
+    const fraction = "\\d+(?:\\/\\d+)+";
+    const r2 = `${fraction}(?:${plus}${fraction})*p?`;
     const r3 = `^${r2}(?:${comma}${r2})*$`;
 
     let updatedBars: IBar[] = [];
     const Aminor = ["A4","C4","E4","A3"].reverse()
     if (new RegExp(r3).test(e.currentTarget.value)) {
-      console.log(e.currentTarget.value);
       
       
-        const res = math.evaluate(
-          e.currentTarget.value.split(/\s*,\s*/)
-        ) as number[];
+        const values = e.currentTarget.value.split(/\s*,\s*/)
+        console.log(values);
+        
+        // @ts-ignore
+        updatedBars = values.map((v,i) => {
+          
+          let isPause = /p$/.test(v)
 
-        res.forEach((n,i) => {
-          updatedBars.push({
-            length: n,
-            // @ts-ignore
-            note: Aminor[i%Aminor.length],
-          });
-        });
+          v = v.replace(/p/,"")
 
-        console.log(res);
+          
+          return {
+            note:Aminor[i%Aminor.length],
+            length: math.evaluate(v),
+            isPause 
+          }
+        })
+
       
 
       setBars(updatedBars)
