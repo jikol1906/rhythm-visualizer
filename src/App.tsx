@@ -24,7 +24,6 @@ function App() {
   const beats = useRef<number>(0);
 
   useEffect(() => {
-    Tone.Transport.bpm.value = 40;
     synth.current = new Tone.Synth({
       envelope: {
         release: 0.1,
