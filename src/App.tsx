@@ -49,9 +49,15 @@ function App() {
     
     let currentTime = 0;
     const notes = bars.map((b, i) => {
-      const toReturn = { time: currentTime, note: b.note };
+      
+      console.log(b.length);
+      
+      const toReturn = { time: currentTime, note: b.note, length:b.length * lengthOfMeasure };
       currentTime += b.length * lengthOfMeasure;
-      return toReturn;
+      if(!b.isPause) {
+
+        return toReturn;
+      }
     });
 
     const part = new Tone.Part((time, value) => {
@@ -59,7 +65,7 @@ function App() {
         setCurr((prev) => (prev + 1) % bars.length);
       }, time);
 
-      synth.current?.triggerAttackRelease(value.note, 2, time);
+      synth.current?.triggerAttackRelease(value.note, value.length, time);
     }, notes).start(0);
     
     part.loop = true;
