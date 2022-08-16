@@ -159,7 +159,6 @@ function App() {
     const r3 = `^${r2}(?:${comma}${r2})*$`;
 
     let updatedBars: IBar[] = [];
-    const Aminor = ["A4","C4","E4","A3"].reverse()
     if (new RegExp(r3).test(e.currentTarget.value)) {
       
       
@@ -172,10 +171,6 @@ function App() {
           let isPause = /p$/.test(v)
           const [_,frac,parsedNote] = v.match(new RegExp(r2)) as string[]
           const t = v.match(new RegExp(r2)) as string[]
-
-          console.log({t,frac,parsedNote});
-          
-          v = v.replace(/p/,"")
 
     
           
