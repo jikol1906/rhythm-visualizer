@@ -37,31 +37,16 @@ function App() {
     }).toDestination();
   }, []);
 
-  const disposeOldParts = () => {
-    if(part.current) {
-      part.current.dispose();
-    }
 
-    if(loop.current) {
-      loop.current.dispose()
-    }
+  useEffect(() => {
 
-    if(tween.current) {
-      tween.current.kill()
-    }
-  }
-
-  const start = async () => {
-    if(!toneStarted.current) {
-      await Tone.start();
-      console.log('starting tone');
-      
-      toneStarted.current = true
-    }
-    re()
-    disposeOldParts();
     const lengthOfMeasure = Tone.Time("1m").toSeconds();
 
+    setCurr(-1)
+    tween.current?.seek(0);
+    beats.current = 0;
+    
+    
     let currentTime = 0;
     const notes = bars.map((b, i) => {
       const toReturn = { time: currentTime, note: b.note };
@@ -69,14 +54,17 @@ function App() {
       return toReturn;
     });
 
-    part.current = new Tone.Part((time, value) => {
+    const part = new Tone.Part((time, value) => {
       Tone.Draw.schedule(() => {
         setCurr((prev) => (prev + 1) % bars.length);
       }, time);
 
       synth.current?.triggerAttackRelease(value.note, 2, time);
     }, notes).start(0);
-    loop.current = new Tone.Loop((time) => {
+    
+    part.loop = true;
+
+    const m = new Tone.Loop((time) => {
       if (beats.current % 4 === 0) {
         Tone.Draw.schedule(() => {
           tween.current?.restart();
@@ -86,11 +74,28 @@ function App() {
       metronome.current?.triggerAttackRelease("C6", 0.05, time,.5);
     }, "4n").start(0);
 
-    part.current.loop = true;
+    Tone.Transport.seconds = 0;
 
-    part.current.start(0);
+    return () => {
+      part.dispose();
+      m.dispose()
+    }
 
-    Tone.Transport.start();
+  },[bars])
+
+
+  const toggleTransport = () => {
+    Tone.Transport.toggle();
+  }
+
+  const start = async () => {
+    if(!toneStarted.current) {
+      await Tone.start();  
+      toneStarted.current = true
+    }
+    // re()
+    
+
 
     tween.current = gsap.fromTo(
       ref2.current,
@@ -103,6 +108,11 @@ function App() {
         ease: "linear",
       }
     );
+
+    
+
+    Tone.Transport.start();
+
   };
 
   const onInput = (e: React.FormEvent<HTMLInputElement>) => {
