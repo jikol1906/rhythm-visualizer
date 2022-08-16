@@ -24,7 +24,7 @@ function App() {
   const beats = useRef<number>(0);
 
   useEffect(() => {
-    Tone.Transport.bpm.value = 50;
+    Tone.Transport.bpm.value = 40;
     synth.current = new Tone.Synth({
       envelope: {
         release: 0.1,
@@ -133,7 +133,7 @@ function App() {
     const r3 = `^${r2}(?:${comma}${r2})*$`;
 
     let updatedBars: IBar[] = [];
-
+    const Aminor = ["A4","C4","E4","A3"].reverse()
     if (new RegExp(r3).test(e.currentTarget.value)) {
       console.log(e.currentTarget.value);
       if (e.currentTarget.value.includes(",")) {
@@ -141,11 +141,11 @@ function App() {
           e.currentTarget.value.split(/\s*,\s*/)
         ) as number[];
 
-        res.forEach((n) => {
+        res.forEach((n,i) => {
           updatedBars.push({
             length: n,
             // @ts-ignore
-            note: ["A4","C4","E4","A3","C3","E3"][Math.floor(Math.random()*6)],
+            note: Aminor[i%Aminor.length],
           });
         });
 
